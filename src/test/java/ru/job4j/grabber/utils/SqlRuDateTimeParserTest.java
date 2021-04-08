@@ -3,11 +3,15 @@ package ru.job4j.grabber.utils;
 import org.junit.Assert;
 import org.junit.Test;
 import ru.job4j.html.SqlRuParse;
+import static org.hamcrest.Matchers.is;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+
+import static org.junit.Assert.assertThat;
 
 public class SqlRuDateTimeParserTest {
 
@@ -24,5 +28,24 @@ public class SqlRuDateTimeParserTest {
         Assert.assertEquals(rsl1, exp1);
         Assert.assertEquals(rsl2, exp2);
         Assert.assertEquals(rsl3, exp3);
+    }
+
+    @Test
+    public void parseSomePage() throws IOException {
+        SqlRuParse parse1Page = new SqlRuParse();
+        SqlRuParse parse3Page = new SqlRuParse();
+        parse1Page.run(1);
+        parse3Page.run(3);
+        assertThat(parse1Page.getMap().size(), is(53));
+        assertThat(parse3Page.getMap().size(), is(153));
+    }
+
+    @Test
+    public void mapIsImmutable() throws IOException {
+        SqlRuParse parse1Page = new SqlRuParse();
+        parse1Page.run(1);
+        assertThat(parse1Page.getMap().size(), is(53));
+        parse1Page.getMap().put("Ex", "Ex");
+        assertThat(parse1Page.getMap().size(), is(53));
     }
 }
