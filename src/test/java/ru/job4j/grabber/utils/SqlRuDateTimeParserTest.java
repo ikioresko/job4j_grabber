@@ -14,13 +14,13 @@ import java.util.List;
 import static org.junit.Assert.assertThat;
 
 public class SqlRuDateTimeParserTest {
-
     @Test
     public void parseDateAndTime() {
+        SqlRuParse parse = new SqlRuParse();
         List<String> list = List.of("сегодня, 19:23", "вчера, 9:15", "2 янв 21, 7:30");
-        LocalDateTime rsl1 = SqlRuParse.parseLocalDateTime(list.get(0));
-        LocalDateTime rsl2 = SqlRuParse.parseLocalDateTime(list.get(1));
-        LocalDateTime rsl3 = SqlRuParse.parseLocalDateTime(list.get(2));
+        LocalDateTime rsl1 = parse.parseLocalDateTime(list.get(0));
+        LocalDateTime rsl2 = parse.parseLocalDateTime(list.get(1));
+        LocalDateTime rsl3 = parse.parseLocalDateTime(list.get(2));
         LocalDateTime exp1 = LocalDateTime.of(LocalDate.now(), LocalTime.of(19, 23));
         LocalDateTime exp2 = LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.of(9, 15));
         LocalDateTime exp3 = LocalDateTime.of(
@@ -36,16 +36,16 @@ public class SqlRuDateTimeParserTest {
         SqlRuParse parse3Page = new SqlRuParse();
         parse1Page.run(1);
         parse3Page.run(3);
-        assertThat(parse1Page.getMap().size(), is(53));
-        assertThat(parse3Page.getMap().size(), is(153));
+        assertThat(parse1Page.getSet().size(), is(53));
+        assertThat(parse3Page.getSet().size(), is(153));
     }
 
     @Test
-    public void mapIsImmutable() throws IOException {
+    public void setIsImmutable() throws IOException {
         SqlRuParse parse1Page = new SqlRuParse();
         parse1Page.run(1);
-        assertThat(parse1Page.getMap().size(), is(53));
-        parse1Page.getMap().put("Ex", "Ex");
-        assertThat(parse1Page.getMap().size(), is(53));
+        assertThat(parse1Page.getSet().size(), is(53));
+        parse1Page.getSet().add(new Post());
+        assertThat(parse1Page.getSet().size(), is(53));
     }
 }
