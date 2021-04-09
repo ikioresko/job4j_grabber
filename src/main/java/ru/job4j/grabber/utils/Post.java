@@ -6,15 +6,12 @@ import java.util.Objects;
 /**
  * Класс является моделью данных которая описывает объявление на сайте sql.ru
  * Для создания объекта используется Билдер.
- * Методы equals и hashCode не используют поле viewCount, ввиду того что оно всегда увеличивается.
  */
 public class Post {
+    private int id;
+    private String name;
+    private String text;
     private String link;
-    private String topicName;
-    private String author;
-    private String description;
-    private int answers;
-    private int viewCount;
     private LocalDateTime data;
 
     public static class Builder {
@@ -24,33 +21,23 @@ public class Post {
             newPost = new Post();
         }
 
+        public Builder builderId(int id) {
+            newPost.id = id;
+            return this;
+        }
+
+        public Builder builderName(String name) {
+            newPost.name = name;
+            return this;
+        }
+
+        public Builder builderText(String text) {
+            newPost.text = text;
+            return this;
+        }
+
         public Builder builderLink(String link) {
             newPost.link = link;
-            return this;
-        }
-
-        public Builder builderTopicName(String topicName) {
-            newPost.topicName = topicName;
-            return this;
-        }
-
-        public Builder builderAuthor(String author) {
-            newPost.author = author;
-            return this;
-        }
-
-        public Builder builderDescription(String description) {
-            newPost.description = description;
-            return this;
-        }
-
-        public Builder builderAnswers(int answers) {
-            newPost.answers = answers;
-            return this;
-        }
-
-        public Builder builderViewCount(int viewCount) {
-            newPost.viewCount = viewCount;
             return this;
         }
 
@@ -65,19 +52,6 @@ public class Post {
     }
 
     @Override
-    public String toString() {
-        return "Post{"
-                + "link='" + link
-                + ", topicName='" + topicName
-                + ", author='" + author
-                + ", description='" + description
-                + ", answers=" + answers
-                + ", viewCount=" + viewCount
-                + ", data=" + data
-                + '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -86,16 +60,26 @@ public class Post {
             return false;
         }
         Post post = (Post) o;
-        return answers == post.answers
+        return id == post.id
+                && Objects.equals(name, post.name)
+                && Objects.equals(text, post.text)
                 && Objects.equals(link, post.link)
-                && Objects.equals(topicName, post.topicName)
-                && Objects.equals(author, post.author)
-                && Objects.equals(description, post.description)
                 && Objects.equals(data, post.data);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(link, topicName, author, description, answers, data);
+        return Objects.hash(id, name, text, link, data);
+    }
+
+    @Override
+    public String toString() {
+        return "Post{"
+                + "id=" + id
+                + ", name='" + name
+                + ", text='" + text
+                + ", link='" + link
+                + ", data=" + data
+                + '}';
     }
 }
