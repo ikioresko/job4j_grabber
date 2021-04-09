@@ -33,19 +33,7 @@ public class SqlRuDateTimeParserTest {
     @Test
     public void parseSomePage() throws IOException {
         SqlRuParse parse1Page = new SqlRuParse();
-        SqlRuParse parse3Page = new SqlRuParse();
-        parse1Page.run(1);
-        parse3Page.run(3);
-        assertThat(parse1Page.getSet().size(), is(53));
-        assertThat(parse3Page.getSet().size(), is(153));
-    }
-
-    @Test
-    public void setIsImmutable() throws IOException {
-        SqlRuParse parse1Page = new SqlRuParse();
-        parse1Page.run(1);
-        assertThat(parse1Page.getSet().size(), is(53));
-        parse1Page.getSet().add(new Post());
-        assertThat(parse1Page.getSet().size(), is(53));
+        List<Post> list = parse1Page.list("https://www.sql.ru/forum/job-offers/");
+        assertThat(list.size(), is(53));
     }
 }

@@ -4,25 +4,17 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import ru.job4j.grabber.Parse;
 import ru.job4j.grabber.utils.Post;
 import ru.job4j.grabber.utils.SqlRuDateTimeParser;
 
 import java.io.IOException;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
-public class SqlRuParse {
-    private final Set<Post> postFromSql;
-
-    public SqlRuParse() {
-        this.postFromSql = new HashSet<>();
-    }
-
-    public HashSet<Post> getSet() {
-        return new HashSet<>(this.postFromSql);
-    }
+public class SqlRuParse implements Parse {
 
     public Elements getElements(String url, String cssQuery) throws IOException {
         Document doc = Jsoup.connect(url).get();
@@ -34,51 +26,59 @@ public class SqlRuParse {
     }
 
     /**
-     * Метод принимает значение количества страниц для парсинга. Вызывает метод getElements(),
-     * который извлекает элементы аттрибута по указанной ссылке. Строка дата преобразуется
-     * в формат LocalDateTime в классе {@link SqlRuDateTimeParser} методом parseDateTime(),
-     * остальные строки конвертируются в текстовые и цифрые значения. Затем создается объект
-     * класса {@link Post} в который при помощи Билдера вставляются его данные, затем
-     * объект заносится в HashSet.
+     * Метод принимает ссылку на страницу с объявлениями вакансий,
+     * парсит ссылку на каждое объявление и передает ее в метод detail(),
+     * который возвращает объект Post содержащий детали одного поста.
+     * Затем объект добавляется в лист.
      *
-     * @param quantityPage количество страниц для парсинга.
-     * @throws IOException getDesc(), getElements()
+     * @param link ссылка на страницу с объявлениями.
+     * @return Список всех объявлений, с их содержимым.
+     * @throws IOException detail(), getElements()
      */
-    public void run(int quantityPage) throws IOException {
-        for (int i = 1; i < quantityPage + 1; i++) {
-            Elements row = getElements(
-                    "https://www.sql.ru/forum/job-offers/" + i, ".postslisttopic");
-            for (Element td : row) {
-                Element href = td.child(0);
-                Element data = td.parent();
-                LocalDateTime ldt = parseLocalDateTime(data.child(5).text());
-                String link = href.attr("href");
-                Post post = new Post.Builder()
-                        .builderLink(link)
-                        .builderTopicName(data.child(1).child(0).text())
-                        .builderAuthor(data.child(2).text())
-                        .builderDescription(getDesc(link))
-                        .builderAnswers(Integer.parseInt(data.child(3).text()))
-                        .builderViewCount(Integer.parseInt(data.child(4).text()))
-                        .builderData(ldt).build();
-                postFromSql.add(post);
-            }
+    @Override
+    public List<Post> list(String link) throws IOException {
+        List<Post> list = new ArrayList<>();
+        Elements row = getElements(link, ".postslisttopic");
+        for (Element td : row) {
+            Element href = td.child(0);
+            String linkOfPost = href.attr("href");
+            list.add(detail(linkOfPost));
         }
+        return list;
     }
 
-    public String getDesc(String link) throws IOException {
-        Elements row = getElements(link, ".msgBody");
-        return row.get(1).text();
-    }
-
-    public void print() {
-        for (Post post : getSet()) {
-            System.out.println(post.toString());
-        }
+    /**
+     * Метод принимает ссылку на конкретный пост, извлекает из него имя вакансии,
+     * описание вакансии, дату его размещения, и размещает полученные данные в
+     * объекте класса {@link Post}
+     *
+     * @param link Ссылка на конкретное объявление.
+     * @return объект Post содержащий детали одного объявления.
+     * @throws IOException getElements()
+     */
+    @Override
+    public Post detail(String link) throws IOException {
+        Post post;
+        Elements row = getElements(link, ".msgTable");
+        Element el = row.get(0);
+        String data = el.child(0).child(2).text();
+        int index = data.indexOf("[");
+        data = data.substring(0, index - 1);
+        LocalDateTime ldt = parseLocalDateTime(data);
+        post = new Post.Builder()
+                .builderName(el.child(0).child(0).text())
+                .builderText(el.child(0).child(1).child(1).text())
+                .builderLink(link)
+                .builderData(ldt)
+                .build();
+        return post;
     }
 
     public static void main(String[] args) throws IOException {
         SqlRuParse sql = new SqlRuParse();
-        sql.run(1);
+        List<Post> list = sql.list("https://www.sql.ru/forum/job-offers");
+        for (Post p : list) {
+            System.out.println(p.toString());
+        }
     }
 }

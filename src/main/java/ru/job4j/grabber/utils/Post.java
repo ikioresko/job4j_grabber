@@ -6,6 +6,7 @@ import java.util.Objects;
 /**
  * Класс является моделью данных которая описывает объявление на сайте sql.ru
  * Для создания объекта используется Билдер.
+ * Поле id присваивается при вставке в БД.
  */
 public class Post {
     private int id;
@@ -14,8 +15,12 @@ public class Post {
     private String link;
     private LocalDateTime data;
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public static class Builder {
-        private Post newPost;
+        private final Post newPost;
 
         public Builder() {
             newPost = new Post();
