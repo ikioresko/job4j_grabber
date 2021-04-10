@@ -2,6 +2,7 @@ package ru.job4j.grabber.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import ru.job4j.grabber.Post;
 import ru.job4j.html.SqlRuParse;
 import static org.hamcrest.Matchers.is;
 
