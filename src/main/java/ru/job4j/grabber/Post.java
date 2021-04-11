@@ -19,6 +19,26 @@ public class Post {
         this.id = id;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public LocalDateTime getData() {
+        return data;
+    }
+
     public static class Builder {
         private final Post newPost;
 

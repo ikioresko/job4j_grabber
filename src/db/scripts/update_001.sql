@@ -1,4 +1,7 @@
-create table if not exists jobs(
-   id serial primary key not null,
-   name varchar(2000)
+create table if not exists post(
+   id serial primary key,
+   name varchar(2000),
+   text text,
+   link varchar(300) UNIQUE,
+   created timestamp
 );
