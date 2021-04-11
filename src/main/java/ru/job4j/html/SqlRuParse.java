@@ -42,15 +42,18 @@ public class SqlRuParse implements Parse {
         for (Element td : row) {
             Element href = td.child(0);
             String linkOfPost = href.attr("href");
-            list.add(detail(linkOfPost));
+            Post post = detail(linkOfPost);
+            if (post != null) {
+                list.add(post);
+            }
         }
         return list;
     }
 
     /**
      * Метод принимает ссылку на конкретный пост, извлекает из него имя вакансии,
-     * описание вакансии, дату его размещения, и размещает полученные данные в
-     * объекте класса {@link Post}
+     * описание вакансии, дату его размещения, если текст объявления содержит ключевое слово,
+     * полученные данные размещаются в объекте класса {@link Post}
      *
      * @param link Ссылка на конкретное объявление.
      * @return объект Post содержащий детали одного объявления.
@@ -58,19 +61,22 @@ public class SqlRuParse implements Parse {
      */
     @Override
     public Post detail(String link) throws IOException {
-        Post post;
+        Post post = null;
         Elements row = getElements(link, ".msgTable");
         Element el = row.get(0);
-        String data = el.child(0).child(2).text();
-        int index = data.indexOf("[");
-        data = data.substring(0, index - 1);
-        LocalDateTime ldt = parseLocalDateTime(data);
-        post = new Post.Builder()
-                .builderName(el.child(0).child(0).text())
-                .builderText(el.child(0).child(1).child(1).text())
-                .builderLink(link)
-                .builderData(ldt)
-                .build();
+        String text = el.child(0).child(1).child(1).text();
+        if (text.toLowerCase().contains("java")) {
+            String data = el.child(0).child(2).text();
+            int index = data.indexOf("[");
+            data = data.substring(0, index - 1);
+            LocalDateTime ldt = parseLocalDateTime(data);
+            post = new Post.Builder()
+                    .builderName(el.child(0).child(0).text())
+                    .builderText(text)
+                    .builderLink(link)
+                    .builderData(ldt)
+                    .build();
+        }
         return post;
     }
 

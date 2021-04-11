@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import ru.job4j.grabber.Post;
 import ru.job4j.html.SqlRuParse;
-import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -12,7 +11,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertFalse;
 
 public class SqlRuDateTimeParserTest {
     @Test
@@ -35,6 +34,6 @@ public class SqlRuDateTimeParserTest {
     public void parseSomePage() throws IOException {
         SqlRuParse parse1Page = new SqlRuParse();
         List<Post> list = parse1Page.list("https://www.sql.ru/forum/job-offers/");
-        assertThat(list.size(), is(53));
+        assertFalse(list.isEmpty());
     }
 }
