@@ -100,11 +100,11 @@ public class Post {
     @Override
     public String toString() {
         return "Post{"
-                + "id=" + id
-                + ", name='" + name
-                + ", text='" + text
-                + ", link='" + link
-                + ", data=" + data
-                + '}';
+                + "id=" + id + System.lineSeparator()
+                + "data=" + data + System.lineSeparator()
+                + "name='" + name + System.lineSeparator()
+                + "text='" + text + System.lineSeparator()
+                + "link='" + link + System.lineSeparator()
+                + "/end}" + System.lineSeparator();
     }
 }
