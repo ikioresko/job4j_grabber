@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * @param <K> Ключом являетсся имя файла в виде "filename.txt"
  * @param <V> Значением является содержимое файла обернутое SoftReference
  * @author Kioresko Igor
- * @version 0.1
+ * @version 0.2
  */
 public class CacheDemo<K, V> {
     private final String path;
@@ -31,56 +31,48 @@ public class CacheDemo<K, V> {
         map = new HashMap<>();
     }
 
-    public Map<K, SoftReference<V>> getMap() {
-        return map;
-    }
-
     /**
      * Возвращает значение из отображения по ключу, ключ является названием файла
      *
      * @param filename Имя файла в виде "filename.txt"
-     * @return содержимое файла обернутое SoftReference
-     * @throws IOException наследуется от getValue()
+     * @return Value отображения извлеченное из SoftReference
      */
-    public SoftReference<V> getFromCache(String filename) throws IOException {
-        SoftReference<V> ref = map.get(filename);
-        if (ref == null) {
-            readOne(filename);
-        }
-        return ref;
+    public V getFromCache(String filename) {
+        readOne(filename);
+        return map.get(filename).get();
     }
 
     /**
      * Совершает единичную вставку в отображение Map<K, SoftReference<V>>
      *
      * @param file Имя файла в виде "filename.txt"
-     * @throws IOException наследуется от getValue()
      */
-    public void readOne(String file) throws IOException {
-        map.put((K) file, getValue(file));
+    public void readOne(String file) {
+        map.putIfAbsent((K) file, getValue(file));
     }
 
     /**
-     * Извлекает содержимое конкретного файла
+     * Извлекает содержимое конкретного файла, оборачивает его в SoftReference
      *
      * @param file Имя файла в виде "filename.txt"
      * @return содержимое файла обернутое SoftReference
-     * @throws FileNotFoundException FileReader() если указанный файл не существует,
-     *                               является каталогом, а не обычным файлом,
-     *                               или по какой-либо другой причине не может
-     *                               быть открыт для чтения.
      */
-    private SoftReference getValue(String file) throws FileNotFoundException {
-        BufferedReader reader = new BufferedReader(new FileReader(path + "" + file));
-        return new SoftReference(reader
-                .lines()
-                .collect(Collectors.joining(System.lineSeparator())));
+    private SoftReference getValue(String file) {
+        SoftReference reference = null;
+        try (BufferedReader reader = new BufferedReader(new FileReader(path + "" + file))) {
+            reference = new SoftReference(reader
+                    .lines()
+                    .collect(Collectors.joining(System.lineSeparator())));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return reference;
     }
 
     /**
      * Обепечивает консольный интерфейс для управления методоами
      *
-     * @throws IOException наследуется от getValue()
+     * @throws IOException наследуется от readAll()
      */
     public void run() throws IOException {
         boolean run = true;
@@ -99,14 +91,12 @@ public class CacheDemo<K, V> {
                         + ln
                         + "File will be checked in this folder: " + path);
                 input = scan.nextLine();
-                SoftReference value = getFromCache(input);
-                if (value == null) {
-                    System.out.println("File added in to cache if exist, try check again");
-                } else {
-                    System.out.println(value.get()
-                            + ln
-                            + "Are you happy with this result?");
-                }
+                V value = getFromCache(input);
+                System.out.println("File added in to cache"
+                        + ln
+                        + value
+                        + ln
+                        + "Are you happy with this result?");
             }
             if (input.equals("2")) {
                 readAll();
@@ -120,14 +110,13 @@ public class CacheDemo<K, V> {
     /**
      * Добавляет все фалйы из папки указанной в поле path, в отображение Map<K, SoftReference<V>>
      *
-     * @throws IOException наследуется от getValue() или Files.walk() - если возникает
-     *                     ошибка ввода-вывода при доступе к начальному файлу
+     * @throws IOException Files.walk() - если возникает ошибка ввода-вывода
+     *                     при доступе к начальному файлу
      */
     public void readAll() throws IOException {
         List<Path> list = Files.walk(Path.of(path)).skip(1).collect(Collectors.toList());
         for (Path p : list) {
-            SoftReference value = getValue(p.getFileName().toString());
-            map.putIfAbsent((K) p.getFileName().toString(), value);
+            readOne(p.getFileName().toString());
         }
     }
 

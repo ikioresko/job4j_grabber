@@ -15,20 +15,23 @@ public class CacheDemoTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
     private final String ls = System.lineSeparator();
+    public final String expected = "S0C Current survivor space 0 capacity (KB)." + ls
+            + "S1C Current survivor space 1 capacity (KB)." + ls
+            + "S0U Survivor space 0 utilization (KB)." + ls
+            + "S1U Survivor space 1 utilization (KB).";
 
     @Test
     public void whenAdd1File() throws IOException {
         File source = folder.newFile("Source.txt");
         CacheDemo<String, String> demo = new CacheDemo<>(
-                source.toString());
+                source.getParent() + "/");
         try (PrintWriter out = new PrintWriter(source)) {
             out.println("S0C Current survivor space 0 capacity (KB).");
             out.println("S1C Current survivor space 1 capacity (KB).");
             out.println("S0U Survivor space 0 utilization (KB).");
             out.println("S1U Survivor space 1 utilization (KB).");
         }
-        demo.readOne("");
-        assertThat(demo.getMap().size(), is(1));
+        assertThat(demo.getFromCache("Source.txt"), is(expected));
     }
 
     @Test
@@ -43,10 +46,8 @@ public class CacheDemoTest {
             out.println("S0U Survivor space 0 utilization (KB).");
             out.println("S1U Survivor space 1 utilization (KB).");
         }
-        source2 = source1;
-        source3 = source1;
         demo.readAll();
-        assertThat(demo.getMap().size(), is(3));
+        assertThat(demo.getFromCache("Source.txt"), is(expected));
     }
 
     @Test
@@ -63,11 +64,7 @@ public class CacheDemoTest {
         }
         source2 = source1;
         source3 = source1;
-        String expected = "S0C Current survivor space 0 capacity (KB)." + ls
-                + "S1C Current survivor space 1 capacity (KB)." + ls
-                + "S0U Survivor space 0 utilization (KB)." + ls
-                + "S1U Survivor space 1 utilization (KB).";
         demo.readAll();
-        assertThat(demo.getFromCache("Source.txt").get(), is(expected));
+        assertThat(demo.getFromCache("Source.txt"), is(expected));
     }
 }
