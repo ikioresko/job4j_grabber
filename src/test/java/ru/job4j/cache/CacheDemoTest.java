@@ -34,9 +34,8 @@ public class CacheDemoTest {
     @Test
     public void whenAdd1File() throws IOException {
         File source = getFile();
-        CacheDemo<String, String> demo = new CacheDemo<>(
-                source.getParent() + "/");
-        assertThat(demo.getFromCache("Source.txt").get(), is(expected));
+        CacheDemo<String, String> demo = new CacheDemo<>(source.getParent() + "/");
+        assertThat(demo.getFromCache("Source.txt"), is(expected));
     }
 
     @Test
@@ -45,8 +44,10 @@ public class CacheDemoTest {
         File source2 = folder.newFile("Source1.txt");
         File source3 = folder.newFile("Source2.txt");
         CacheDemo<String, String> demo = new CacheDemo<>(source1.getParent() + "/");
-        demo.readAll();
-        assertThat(demo.getFromCache("Source.txt").get(), is(expected));
+        demo.readOne("Source.txt");
+        demo.readOne("Source1.txt");
+        demo.readOne("Source2.txt");
+        assertThat(demo.getFromCache("Source.txt"), is(expected));
     }
 
     @Test
@@ -55,8 +56,8 @@ public class CacheDemoTest {
         File source2 = source1;
         File source3 = source1;
         CacheDemo<String, String> demo = new CacheDemo<>(source1.getParent() + "/");
-        demo.readAll();
-        assertThat(demo.getFromCache("Source.txt").get(), is(expected));
+        demo.readOne("Source.txt");
+        assertThat(demo.getFromCache("Source.txt"), is(expected));
     }
 
     @Test
@@ -64,7 +65,7 @@ public class CacheDemoTest {
         File source = getFile();
         CacheDemo<String, String> demo = new CacheDemo<>(source.getParent() + "/");
         assertThat(demo.isExist("Source.txt"), is(false));
-        demo.readAll();
+        demo.readOne("Source.txt");
         assertThat(demo.isExist("Source.txt"), is(true));
     }
 }
