@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  * @param <K> Ключом являетсся имя файла в виде "filename.txt"
  * @param <V> Значением является содержимое файла обернутое SoftReference
  * @author Kioresko Igor
- * @version 0.2
+ * @version 0.3
  */
 public class CacheDemo<K, V> {
     private final String path;
@@ -32,23 +32,43 @@ public class CacheDemo<K, V> {
     }
 
     /**
+     * Проверяет содержится ли ключ в отображении. Если существует - запрашивает value
+     * иначе вызывает readOne() чтобы добавить Key & Value в отображение
      * Возвращает значение из отображения по ключу, ключ является названием файла
      *
      * @param filename Имя файла в виде "filename.txt"
      * @return Value отображения извлеченное из SoftReference
      */
-    public V getFromCache(String filename) {
-        readOne(filename);
-        return map.get(filename).get();
+    public SoftReference<V> getFromCache(String filename) {
+        SoftReference reference = null;
+        if (isExist(filename)) {
+            reference = map.get(filename);
+        } else {
+            reference = readOne(filename);
+        }
+        return reference;
+    }
+
+    /**
+     * Проверяет наличие Key в отображении
+     *
+     * @param filename Имя файла в виде "filename.txt"
+     * @return true если ключ есть в кеше, иначе false
+     */
+    public boolean isExist(String filename) {
+        return map.containsKey(filename);
     }
 
     /**
      * Совершает единичную вставку в отображение Map<K, SoftReference<V>>
      *
      * @param file Имя файла в виде "filename.txt"
+     * @return содержимое файла обернутое SoftReference
      */
-    public void readOne(String file) {
-        map.putIfAbsent((K) file, getValue(file));
+    public SoftReference<V> readOne(String file) {
+        SoftReference reference = getValue(file);
+        map.put((K) file, reference);
+        return reference;
     }
 
     /**
@@ -91,10 +111,10 @@ public class CacheDemo<K, V> {
                         + ln
                         + "File will be checked in this folder: " + path);
                 input = scan.nextLine();
-                V value = getFromCache(input);
+                SoftReference value = getFromCache(input);
                 System.out.println("File added in to cache"
                         + ln
-                        + value
+                        + value.get()
                         + ln
                         + "Are you happy with this result?");
             }
